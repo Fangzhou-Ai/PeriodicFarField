@@ -1,69 +1,11 @@
 #pragma once
 
-#include <cusp/coo_matrix.h>
-#include <cusp/multiply.h>
-#include <cusp/transpose.h>
-#include <cusp/sort.h>
-#include <cusp/print.h>
-#include <cusp/eigen/spectral_radius.h>
-#include <cusp/krylov/gmres.h>
-#include <cusp/monitor.h>
-#include <cusp/functional.h>
-#include <thrust/device_ptr.h>
-#include <mutex>
-#include <vector>
-#include <unordered_map>
-#include <string>
-#include <limits>
+#include "utils.h"
 
 #define INDEX_TYPE uint32_t
 #define KEY_TYPE uint64_t
 
 namespace puff {
-
-    template<typename IndexType, typename ValueType, typename MemorySpace>
-    using SparseMatrix = cusp::coo_matrix<IndexType, ValueType, MemorySpace>;        
-
-    template<typename ValueType, typename MemorySpace>
-    using Vector = cusp::array1d<ValueType, MemorySpace>;
-
-    template<typename IndexType, typename ValueType, typename MemorySpace>
-    struct SparseMatrixViewHelper;
-
-    template<typename IndexType, typename ValueType>
-    struct SparseMatrixViewHelper<IndexType, ValueType, cusp::host_memory> {
-        using type = decltype(cusp::make_coo_matrix_view(
-            std::declval<size_t>(), std::declval<size_t>(), std::declval<size_t>(),
-            std::declval<cusp::array1d_view<thrust::permutation_iterator<
-            thrust::detail::normal_iterator<IndexType *>, 
-            thrust::detail::normal_iterator<IndexType *>>>>(),
-            std::declval<cusp::array1d_view<thrust::permutation_iterator<
-            thrust::detail::normal_iterator<IndexType *>, 
-            thrust::detail::normal_iterator<IndexType *>>>>(),
-            std::declval<cusp::array1d_view<thrust::permutation_iterator<
-            thrust::detail::normal_iterator<ValueType *>, 
-            thrust::detail::normal_iterator<IndexType *>>>>()
-        ));
-    };
-
-    template<typename IndexType, typename ValueType>
-    struct SparseMatrixViewHelper<IndexType, ValueType, cusp::device_memory> {
-        using type = decltype(cusp::make_coo_matrix_view(
-            std::declval<size_t>(), std::declval<size_t>(), std::declval<size_t>(),
-            std::declval<cusp::array1d_view<thrust::permutation_iterator<
-            thrust::detail::normal_iterator<thrust::device_ptr<IndexType>>, 
-            thrust::detail::normal_iterator<thrust::device_ptr<IndexType>>>>>(),
-            std::declval<cusp::array1d_view<thrust::permutation_iterator<
-            thrust::detail::normal_iterator<thrust::device_ptr<IndexType>>, 
-            thrust::detail::normal_iterator<thrust::device_ptr<IndexType>>>>>(),
-            std::declval<cusp::array1d_view<thrust::permutation_iterator<
-            thrust::detail::normal_iterator<thrust::device_ptr<ValueType>>, 
-            thrust::detail::normal_iterator<thrust::device_ptr<IndexType>>>>>()
-        ));
-    };
-
-    template<typename IndexType, typename ValueType, typename MemorySpace>
-    using SparseMatrixView = typename SparseMatrixViewHelper<IndexType, ValueType, MemorySpace>::type;
 
 
     template<typename IndexType, typename ValueType, typename MemorySpace>
@@ -211,13 +153,13 @@ namespace puff {
                       bool transpose = false, 
                       bool conjugate = false) {     
                 
-                if constexpr(std::is_same_v<ValueType, thrust::complex<double>> ||
-                             std::is_same_v<ValueType, thrust::complex<float>> ||
-                             std::is_same_v<ValueType, thrust::complex<half>>)
+                if constexpr(std::is_same_v<ValueType, dcomplex> ||
+                             std::is_same_v<ValueType, fcomplex> ||
+                             std::is_same_v<ValueType, hcomplex> ||
+                             std::is_same_v<ValueType, bcomplex>)
                 {
                     if(conjugate)
-                        thrust::transform(matrix.values.begin(), matrix.values.end(), matrix.values.begin(), \
-                            cusp::conj_functor<ValueType>());
+                        thrust::transform(matrix.values.begin(), matrix.values.end(), matrix.values.begin(), conjugate_functor<ValueType>());
                 }
 
                 
@@ -238,13 +180,13 @@ namespace puff {
                         cusp::multiply(matrix, x, y);
                 }
                 
-                if constexpr(std::is_same_v<ValueType, thrust::complex<double>> ||
-                             std::is_same_v<ValueType, thrust::complex<float>> ||
-                             std::is_same_v<ValueType, thrust::complex<half>>)
+                if constexpr(std::is_same_v<ValueType, dcomplex> ||
+                             std::is_same_v<ValueType, fcomplex> ||
+                             std::is_same_v<ValueType, hcomplex> ||
+                             std::is_same_v<ValueType, bcomplex>)
                 {
                     if(conjugate)
-                        thrust::transform(matrix.values.begin(), matrix.values.end(), matrix.values.begin(), \
-                            cusp::conj_functor<ValueType>());
+                        thrust::transform(matrix.values.begin(), matrix.values.end(), matrix.values.begin(), conjugate_functor<ValueType>());
                 }
             }
 

@@ -7,8 +7,7 @@
 #include "SparseMatrix.h"
 #include "CConv3D.h"
 
+
 namespace puff {
-	using dcomplex = thrust::complex<double>;
-	using fcomplex = thrust::complex<float>;
-	using hcomplex = thrust::complex<half>;
+	
 }
