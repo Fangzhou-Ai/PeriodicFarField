@@ -5,6 +5,15 @@
 # Check Visual studio project properties carefully before using
 cmake_minimum_required(VERSION 3.24)
 
+option(NO_WARNINGS "Suppress warnings" OFF)
+if(NO_WARNINGS)
+    if(MSVC)
+        add_compile_options(/W0)
+    else()
+        add_compile_options(-w)
+    endif()
+endif()
+
 # Set host arch and generator, AMD x64 only
 if (MSVC)
     set(CMAKE_GENERATOR_PLATFORM x64)
