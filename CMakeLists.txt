@@ -67,7 +67,10 @@ find_package(MKL CONFIG REQUIRED)
 set(CUSP_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/third_party/cusplibrary)
 # cxxopts
 set(CXXOPTS_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/third_party/cxxopts/include)
-
+# complex_bessel
+add_subdirectory(${CMAKE_SOURCE_DIR}/third_party/complex_bessel)
+include_directories(${CMAKE_SOURCE_DIR}/third_party/complex_bessel/include)
+link_libraries(complex_bessel)
 
 # Set output path
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)

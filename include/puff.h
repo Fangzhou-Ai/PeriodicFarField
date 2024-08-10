@@ -6,7 +6,7 @@
 #endif
 #include "SparseMatrix.h"
 #include "CConv3D.h"
-
+#include "PGF.h"
 
 namespace puff {
 	
